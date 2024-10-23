@@ -1,15 +1,14 @@
-Feature: Pokémon API Tests
+#language: pt
+Funcionalidade: Testes da API Pokémon
 
-  Background:
-    Given I want to fetch details for Pokémon "pikachu"
+  Cenário: Recuperar um Pokémon existente
+    Dado que eu quero buscar detalhes para o ID Pokémon 1
+    Quando eu envio uma requisição GET para a API Pokémon
+    Então a resposta deve conter o nome "bulbasaur"
+    E o status deve ser 200
 
-  Scenario: Retrieve an existing Pokémon
-    When I send a GET request to the Pokémon API
-    Then the response should contain the name "pikachu"
-    And the status code should be 200
-
-  Scenario: Attempt to retrieve a non-existent Pokémon
-    Given I have a non-existent Pokémon ID 99999
-    When I send a GET request to the Pokémon API invalid
-    Then the response status code should be 404
-    And the response message should contain "Not Found"
+  Cenário: Tentar recuperar um Pokémon inexistente
+    Dado que eu tenho um ID de Pokémon inexistente 99999
+    Quando eu envio uma requisição GET para a API Pokémon inválida
+    Então o código de status deve ser 404
+    E a mensagem da resposta deve conter "Not Found"

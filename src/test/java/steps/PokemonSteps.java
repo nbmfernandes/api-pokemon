@@ -1,58 +1,67 @@
 package steps;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.pt.Dado;
+import io.cucumber.java.pt.E;
+import io.cucumber.java.pt.Quando;
+import io.cucumber.java.pt.Então;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.*;
 import org.junit.jupiter.api.Assertions;
 
 public class PokemonSteps {
+
     private Response response;
-    public static final String BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
-    private int pokemonId;
+    private String baseUri;
 
-    @Given("I want to fetch details for Pokémon {string}")
-    public void i_want_to_fetch_details_for_pokemon(String pokemonName) {
-        baseURI = BASE_URL;
-        response = get(pokemonName);  // Faz a requisição diretamente aqui
+    // Cenario 01: Recuperar um Pokemon existente
+    @Dado("que eu quero buscar detalhes para o ID Pokémon {int}")
+    public void que_eu_quero_buscar_detalhes_para_o_pokemon(int pokemonID) {
+        baseUri = "https://pokeapi.co/api/v2/pokemon/" + pokemonID;  // Inicializa a URL base corretamente
     }
 
-    @When("I send a GET request to the Pokémon API")
-    public void i_send_a_get_request_to_the_pokemon_api() {
-        // Esta etapa pode ser removida, pois a requisição já é feita no passo anterior.
+    @Quando("eu envio uma requisição GET para a API Pokémon")
+    public void eu_envio_uma_requisicao_get_para_a_api_pokemon() {
+        response = get(baseUri);
     }
 
-    @Then("the response should contain the name {string}")
-    public void the_response_should_contain_the_name(String expectedName) {
+    @Então("a resposta deve conter o nome {string}")
+    public void a_resposta_deve_conter_o_nome(String expectedName) {
         String actualName = response.jsonPath().getString("name");
-        Assertions.assertEquals(expectedName, actualName);
+
+        // Verifica se a resposta contém o campo 'name'
+        if (actualName == null) {
+            System.out.println("Resposta JSON: " + response.asString());  // Imprime o corpo da resposta para ajudar no debug
+        }
+
+        Assertions.assertEquals(expectedName, actualName, "O nome do Pokémon não corresponde.");
     }
 
-    @Then("the status code should be {int}")
-    public void the_status_code_should_be(int statusCode) {
-        Assertions.assertEquals(statusCode, response.getStatusCode());
+    @E("o status deve ser {int}")
+    public void o_codigo_de_status_deve_ser(int expectedStatusCode) {
+        int actualStatusCode = response.getStatusCode();
+        Assertions.assertEquals(expectedStatusCode, actualStatusCode, "O código de status não corresponde.");
     }
 
-    @Given("I have a non-existent Pokémon ID {int}")
-    public void i_have_a_non_existent_pokemon_id(int id) {
-        this.pokemonId = id;
+    // Cenario 02: Tentar recuperar um Pokémon inexistente
+    @Dado("que eu tenho um ID de Pokémon inexistente {int}")
+    public void que_eu_tenho_um_id_de_pokemon_inexistente(int idInexistente) {
+        baseUri = "https://pokeapi.co/api/v2/pokemon/" + idInexistente;  // Inicializa corretamente a URL base
     }
 
-    @When("I send a GET request to the Pokémon API invalid")
-    public void i_send_a_get_request_to_the_pokemon_api_invalid() {
-        response = get(BASE_URL + pokemonId);
+    @Quando("eu envio uma requisição GET para a API Pokémon inválida")
+    public void eu_envio_uma_requisicao_get_para_a_api_pokemon_invalida() {
+        response = get(baseUri);  // Envia a requisição GET para o Pokémon inexistente
     }
 
-    @Then("the response status code should be {int}")
-    public void the_response_status_code_should_be(int statusCode) {
-        Assertions.assertEquals(statusCode, response.getStatusCode());
+    @Então("o código de status deve ser {int}")
+    public void o_codigo_de_status_da_resposta_deve_ser(int statusCodeEsperado) {
+        int statusCodeAtual = response.getStatusCode();
+        Assertions.assertEquals(statusCodeEsperado, statusCodeAtual, "O código de status não corresponde.");
     }
 
-    @Then("the response message should contain {string}")
-    public void the_response_message_should_contain(String expectedMessage) {
-        String actualMessage = response.asString();
-        Assertions.assertTrue(actualMessage.contains(expectedMessage),
-                "Response message should contain: " + expectedMessage);
+    @E("a mensagem da resposta deve conter {string}")
+    public void a_mensagem_da_resposta_deve_conter(String mensagemEsperada) {
+        String corpoDaResposta = response.asString();
+        Assertions.assertTrue(corpoDaResposta.contains(mensagemEsperada), "A mensagem de erro não contém o esperado.");
     }
 }
